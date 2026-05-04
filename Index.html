@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login</title>
+</head>
+<body style="font-family: Arial; text-align:center; margin-top:100px;">
+
+<h2 id="title">Login</h2>
+
+<input id="email" placeholder="Email"><br><br>
+<input id="password" type="password" placeholder="Password"><br><br>
+
+<button onclick="handleAuth()">Login</button>
+
+<p onclick="toggle()" style="cursor:pointer; color:blue;">
+  Don't have an account? Sign up
+</p>
+
+<p id="msg"></p>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    onAuthStateChanged,
+    signOut
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  // ✅ YOUR CONFIG (already filled in)
+  const firebaseConfig = {
+    apiKey: "AIzaSyDP7MA675sQ9wO_dWe9y5Y0vmBgAO4CVYg",
+    authDomain: "caseroller-9ece0.firebaseapp.com",
+    projectId: "caseroller-9ece0",
+    storageBucket: "caseroller-9ece0.firebasestorage.app",
+    messagingSenderId: "1088552752471",
+    appId: "1:1088552752471:web:38228e7237bccbaa2d9a12"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  let isLogin = true;
+
+  window.toggle = () => {
+    isLogin = !isLogin;
+    document.getElementById("title").innerText = isLogin ? "Login" : "Sign Up";
+    document.querySelector("button").innerText = isLogin ? "Login" : "Sign Up";
+  };
+
+  window.handleAuth = async () => {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const msg = document.getElementById("msg");
+
+    try {
+      if (isLogin) {
+        await signInWithEmailAndPassword(auth, email, password);
+        msg.innerText = "Logged in!";
+      } else {
+        await createUserWithEmailAndPassword(auth, email, password);
+        msg.innerText = "Account created!";
+      }
+    } catch (err) {
+      msg.innerText = err.message;
+    }
+  };
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      document.body.innerHTML = `
+        <h2>Welcome</h2>
+        <p>${user.email}</p>
+        <button onclick="logout()">Logout</button>
+      `;
+    }
+  });
+
+  window.logout = () => {
+    signOut(auth);
+    location.reload();
+  };
+</script>
+
+</body>
+</html>
